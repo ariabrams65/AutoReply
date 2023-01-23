@@ -27,11 +27,14 @@ void AutoReply::onLoad()
 {
 	_globalCvarManager = cvarManager;
 
-	cvarManager->registerCvar("AutoReplyEnabled", "1")
+	cvarManager->registerCvar("AutoReplyEnabled", "1", "Whether AutoReply is enabled")
 		.addOnValueChanged([this](std::string oldValue, CVarWrapper cvar)
 		{
 			cVarEnabledChanged();
 		});
+	cvarManager->registerCvar("goalCompRepliesEnabled", "1", "Determines whether to reply to goal compliments");
+	cvarManager->registerCvar("assistCompReliesEnabled", "1", "Determines whether to reply to assist compliments");
+	cvarManager->registerCvar("apologyRepliesEnabled", "1", "Determines whether to reply to apologies");
 
 	responded = false;
 	hookAll();
@@ -118,7 +121,8 @@ void AutoReply::onChatMessage(void* params)
 
 void AutoReply::handleMessage(const std::string& msg)
 {
-	if (msg == "Group2Message5" || msg == "Group2Message1" || msg == "Group5Message2")
+	if (cvarManager->getCvar("goalCompRepliesEnabled")
+		&& (msg == "Group2Message5" || msg == "Group2Message1" || msg == "Group5Message2"))
 	{
 		lastGoalComp = std::chrono::system_clock::now();
 		if (!responded && withinDuration(lastGoal, 15))
@@ -127,7 +131,8 @@ void AutoReply::handleMessage(const std::string& msg)
 			sendChat('2', '3', 1);
 		}
 	}
-	else if (msg == "Group2Message2" || msg == "Group2Message5" || msg == "Group5Message2")
+	else if (cvarManager->getCvar("assistCompRepliesEnabled")
+		&& msg == "Group2Message2" || msg == "Group2Message5" || msg == "Group5Message2")
 	{
 		lastAssistComp = std::chrono::system_clock::now();
 		if (!responded && withinDuration(lastAssist, 15))
@@ -136,7 +141,8 @@ void AutoReply::handleMessage(const std::string& msg)
 			sendChat('2', '1', 1);
 		}
 	}
-	else if (msg == "Group4Message5" || msg == "Group4Message7" || msg == "Group4Message6" || msg == "Group4Message4" || msg == "Group4Message3")
+	else if (cvarManager->getCvar("apologyReliesEnabled")
+		&& msg == "Group4Message5" || msg == "Group4Message7" || msg == "Group4Message6" || msg == "Group4Message4" || msg == "Group4Message3")
 	{
 		if (withinDuration(lastApologyReply, 15, false))
 		{
