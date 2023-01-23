@@ -1,46 +1,142 @@
 #include "pch.h"
 #include "AutoReply.h"
+#define WINVER 0x0500
+#include <windows.h>
 
 
 BAKKESMOD_PLUGIN(AutoReply, "Reply automatically", plugin_version, PLUGINTYPE_FREEPLAY)
 
 std::shared_ptr<CVarManagerWrapper> _globalCvarManager;
 
+void pressKey(char key)
+{
+	INPUT ip;
+	ip.type = INPUT_KEYBOARD;
+	ip.ki.wScan = 0;
+	ip.ki.time = 0;
+	ip.ki.dwExtraInfo = 0;
+	ip.ki.wVk = key;
+	ip.ki.dwFlags = 0;
+	SendInput(1, &ip, sizeof(INPUT));
+
+	ip.ki.dwFlags = KEYEVENTF_KEYUP;
+	SendInput(1, &ip, sizeof(INPUT));
+}
+
 void AutoReply::onLoad()
 {
 	_globalCvarManager = cvarManager;
-	//cvarManager->log("Plugin loaded!");
+	LOG("AutoTHanks loaded");
+	responded = false;
 
-	//cvarManager->registerNotifier("my_aweseome_notifier", [&](std::vector<std::string> args) {
-	//	cvarManager->log("Hello notifier!");
-	//}, "", 0);
+	gameWrapper->HookEventWithCallerPost<ActorWrapper>("Function TAGame.PlayerController_TA.ChatMessage_TA",
+		[this](ActorWrapper caller, void* params, std::string eventname)
+		{
+			handleMessage(params);
+		});
+	gameWrapper->HookEventWithCallerPost<ServerWrapper>("Function TAGame.GFxHUD_TA.HandleStatEvent",
+		[this](ServerWrapper caller, void* params, std::string eventname)
+		{
+			onStatEvent(params);
+		});
+}
 
-	//auto cvar = cvarManager->registerCvar("template_cvar", "hello-cvar", "just a example of a cvar");
-	//auto cvar2 = cvarManager->registerCvar("template_cvar2", "0", "just a example of a cvar with more settings", true, true, -10, true, 10 );
+void AutoReply::sendChat(char input1, char input2, float delay)
+{
+	gameWrapper->SetTimeout([=](GameWrapper* gw)
+		{
+			pressKey(input1);
+	pressKey(input2);
+		}, delay);
 
-	//cvar.addOnValueChanged([this](std::string cvarName, CVarWrapper newCvar) {
-	//	cvarManager->log("the cvar with name: " + cvarName + " changed");
-	//	cvarManager->log("the new value is:" + newCvar.getStringValue());
-	//});
+}
 
-	//cvar2.addOnValueChanged(std::bind(&AutoReply::YourPluginMethod, this, _1, _2));
+void AutoReply::evalDuration(char input1, char input2, TimePoint timestamp, int seconds)
+{
+	auto curTimeStamp = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsedSeconds = curTimeStamp - timestamp;
+	LOG(std::to_string(elapsedSeconds.count()));
+	if (elapsedSeconds.count() < seconds)
+	{
+		LOG("should say something!");
+		responded = true;
+		sendChat(input1, input2, 1);
+	}
+}
 
-	// enabled decleared in the header
-	//enabled = std::make_shared<bool>(false);
-	//cvarManager->registerCvar("TEMPLATE_Enabled", "0", "Enable the TEMPLATE plugin", true, true, 0, true, 1).bindTo(enabled);
+void AutoReply::handleMessage(void* params)
+{
+	struct ChatMessageParams
+	{
+		void* InPRI;
+		uint8_t Message[0x10];
+		uint8_t ChatChannel;
+		bool bPreset;
+	};
+	if (!params) return;
+	ChatMessageParams* chatParams = reinterpret_cast<ChatMessageParams*>(params);
+	std::string msg = UnrealStringWrapper(reinterpret_cast<uintptr_t>(chatParams->Message)).ToString();
+	PriWrapper chatterPRI(reinterpret_cast<uintptr_t>(chatParams->InPRI));
 
-	//cvarManager->registerNotifier("NOTIFIER", [this](std::vector<std::string> params){FUNCTION();}, "DESCRIPTION", PERMISSION_ALL);
-	//cvarManager->registerCvar("CVAR", "DEFAULTVALUE", "DESCRIPTION", true, true, MINVAL, true, MAXVAL);//.bindTo(CVARVARIABLE);
-	//gameWrapper->HookEvent("FUNCTIONNAME", std::bind(&TEMPLATE::FUNCTION, this));
-	//gameWrapper->HookEventWithCallerPost<ActorWrapper>("FUNCTIONNAME", std::bind(&AutoReply::FUNCTION, this, _1, _2, _3));
-	//gameWrapper->RegisterDrawable(bind(&TEMPLATE::Render, this, std::placeholders::_1));
+	LOG(msg);
 
+	PlayerControllerWrapper playerController = gameWrapper->GetPlayerController();
+	if (!playerController) return;
+	PriWrapper primaryPRI = playerController.GetPRI();
+	if (!primaryPRI) return;
 
-	//gameWrapper->HookEvent("Function TAGame.Ball_TA.Explode", [this](std::string eventName) {
-	//	cvarManager->log("Your hook got called and the ball went POOF");
-	//});
-	// You could also use std::bind here
-	//gameWrapper->HookEvent("Function TAGame.Ball_TA.Explode", std::bind(&AutoReply::YourPluginMethod, this);
+	if (primaryPRI.memory_address == chatterPRI.memory_address) return;
+	if (primaryPRI.GetTeam().GetTeamNum() != chatterPRI.GetTeam().GetTeamNum()) return;
+
+	if (msg == "Group2Message5" || msg == "Group2Message1" || msg == "Group5Message2")
+	{
+		lastGoalComp = std::chrono::system_clock::now();
+		if (!responded)
+		{
+			evalDuration('2', '3', lastGoal, 15);
+		}
+	}
+	else if (msg == "Group2Message2" || msg == "Group2Message5" || msg == "Group5Message2")
+	{
+		lastAssistComp = std::chrono::system_clock::now();
+		if (!responded)
+		{
+			evalDuration('2', '1', lastAssist, 15);
+		}
+	}
+	else if (msg == "Group4Message5" || msg == "Group4Message7" || msg == "Group4Message6" || msg == "Group4Message4" || msg == "Group4Message3")
+	{
+		auto curTimeStamp = std::chrono::system_clock::now();
+		std::chrono::duration<double> elapsedSeconds = curTimeStamp - lastApology;
+		if (elapsedSeconds.count() > 15)
+		{
+			lastApology = std::chrono::system_clock::now();
+			sendChat('4', '2', 2);
+		}
+	}
+}
+
+void AutoReply::onStatEvent(void* params)
+{
+	struct StatEventParams
+	{
+		uintptr_t PRI;
+		uintptr_t StatEvent;
+	};
+	StatEventParams* pStruct = (StatEventParams*)params;
+	StatEventWrapper statEvent = StatEventWrapper(pStruct->StatEvent);
+	if (statEvent.GetEventName() == "Goal")
+	{
+		lastGoal = std::chrono::system_clock::now();
+		responded = false;
+		evalDuration('2', '3', lastGoalComp, 5);
+	}
+	else if (statEvent.GetEventName() == "Assist")
+	{
+		lastAssist = std::chrono::system_clock::now();
+		responded = false;
+		evalDuration('2', '1', lastAssistComp, 5);
+	}
 }
 
 void AutoReply::onUnload()
