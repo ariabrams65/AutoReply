@@ -8,7 +8,7 @@ BAKKESMOD_PLUGIN(AutoReply, "Reply automatically", plugin_version, PLUGINTYPE_FR
 
 std::shared_ptr<CVarManagerWrapper> _globalCvarManager;
 
-void pressKey(char key)
+void AutoReply::pressKey(char key)
 {
 	INPUT ip;
 	ip.type = INPUT_KEYBOARD;
