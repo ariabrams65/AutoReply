@@ -31,14 +31,14 @@ void AutoReply::onLoad()
 
 	gameWrapper->HookEventWithCallerPost<ActorWrapper>("Function TAGame.PlayerController_TA.ChatMessage_TA",
 		[this](ActorWrapper caller, void* params, std::string eventname)
-		{
-			onChatMessage(params);
-		});
+	{
+		onChatMessage(params);
+	});
 	gameWrapper->HookEventWithCallerPost<ServerWrapper>("Function TAGame.GFxHUD_TA.HandleStatEvent",
 		[this](ServerWrapper caller, void* params, std::string eventname)
-		{
-			onStatEvent(params);
-		});
+	{
+		onStatEvent(params);
+	});
 }
 
 void AutoReply::sendChat(char input1, char input2, float delay)
@@ -51,17 +51,11 @@ void AutoReply::sendChat(char input1, char input2, float delay)
 
 }
 
-void AutoReply::evalDuration(char input1, char input2, TimePoint timestamp, int seconds)
+bool AutoReply::withinDuration(TimePoint timestamp, int seconds, bool lessThan = true)
 {
 	auto curTimeStamp = std::chrono::system_clock::now();
-	std::chrono::duration<double> elapsedSeconds = curTimeStamp - timestamp;
-	LOG(std::to_string(elapsedSeconds.count()));
-	if (elapsedSeconds.count() < seconds)
-	{
-		LOG("should say something!");
-		responded = true;
-		sendChat(input1, input2, 1);
-	}
+	std::chrono::duration<double> dur = curTimeStamp - timestamp;
+	return lessThan ? dur.count() < seconds : dur.count() > seconds;
 }
 
 void AutoReply::onChatMessage(void* params)
@@ -94,18 +88,24 @@ void AutoReply::handleMessage(const std::string& msg)
 	if (msg == "Group2Message5" || msg == "Group2Message1" || msg == "Group5Message2")
 	{
 		lastGoalComp = std::chrono::system_clock::now();
-		if (!responded) evalDuration('2', '3', lastGoal, 15);
+		if (!responded && withinDuration(lastGoal, 15))
+		{
+			responded = true;
+			sendChat('2', '3', 1);
+		}
 	}
 	else if (msg == "Group2Message2" || msg == "Group2Message5" || msg == "Group5Message2")
 	{
 		lastAssistComp = std::chrono::system_clock::now();
-		if (!responded) evalDuration('2', '1', lastAssist, 15);
+		if (!responded && withinDuration(lastAssist, 15))
+		{
+			responded = true;
+			sendChat('2', '1', 1);
+		}
 	}
 	else if (msg == "Group4Message5" || msg == "Group4Message7" || msg == "Group4Message6" || msg == "Group4Message4" || msg == "Group4Message3")
 	{
-		auto curTimeStamp = std::chrono::system_clock::now();
-		std::chrono::duration<double> elapsedSeconds = curTimeStamp - lastApology;
-		if (elapsedSeconds.count() > 15)
+		if (withinDuration(lastApology, 15, true))
 		{
 			lastApology = std::chrono::system_clock::now();
 			sendChat('4', '2', 2);
@@ -126,13 +126,21 @@ void AutoReply::onStatEvent(void* params)
 	{
 		lastGoal = std::chrono::system_clock::now();
 		responded = false;
-		evalDuration('2', '3', lastGoalComp, 5);
+		if (withinDuration(lastGoalComp, 5))
+		{
+			responded = true;
+			sendChat('2', '3', 1);
+		}
 	}
 	else if (statEvent.GetEventName() == "Assist")
 	{
 		lastAssist = std::chrono::system_clock::now();
 		responded = false;
-		evalDuration('2', '1', lastAssistComp, 5);
+		if (withinDuration(lastAssistComp, 5))
+		{
+			responded = true;
+			sendChat('2', '1', 1);
+		}
 	}
 }
 

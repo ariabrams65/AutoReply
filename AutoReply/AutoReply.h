@@ -25,8 +25,8 @@ public:
 	void onChatMessage(void* params);
 	void onStatEvent(void* params);
 	void handleMessage(const std::string& msg);
-	void evalDuration(char keyPress1, char keyPress2, TimePoint timestamp, int seconds);
 	void sendChat(char input1, char input2, float delay);
+	bool withinDuration(TimePoint timestamp, int seconds, bool lessThan);
 
 
 private:
