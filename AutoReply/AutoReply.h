@@ -35,7 +35,7 @@ private:
 	TimePoint lastAssist;
 	TimePoint lastGoalComp;
 	TimePoint lastAssistComp;
-	TimePoint lastApology;
+	TimePoint lastApologyReply;
 
 
 	// Inherited via PluginSettingsWindow

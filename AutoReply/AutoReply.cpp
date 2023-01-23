@@ -55,6 +55,7 @@ bool AutoReply::withinDuration(TimePoint timestamp, int seconds, bool lessThan =
 {
 	auto curTimeStamp = std::chrono::system_clock::now();
 	std::chrono::duration<double> dur = curTimeStamp - timestamp;
+	LOG(std::to_string(dur.count()));
 	return lessThan ? dur.count() < seconds : dur.count() > seconds;
 }
 
@@ -105,9 +106,9 @@ void AutoReply::handleMessage(const std::string& msg)
 	}
 	else if (msg == "Group4Message5" || msg == "Group4Message7" || msg == "Group4Message6" || msg == "Group4Message4" || msg == "Group4Message3")
 	{
-		if (withinDuration(lastApology, 15, true))
+		if (withinDuration(lastApologyReply, 15, false))
 		{
-			lastApology = std::chrono::system_clock::now();
+			lastApologyReply = std::chrono::system_clock::now();
 			sendChat('4', '2', 2);
 		}
 	}
