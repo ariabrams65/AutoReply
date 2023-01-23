@@ -22,8 +22,9 @@ class AutoReply : public BakkesMod::Plugin::BakkesModPlugin/*, public BakkesMod:
 public:
 	virtual void onLoad();
 	virtual void onUnload();
-	void handleMessage(void* params);
+	void onChatMessage(void* params);
 	void onStatEvent(void* params);
+	void handleMessage(const std::string& msg);
 	void evalDuration(char keyPress1, char keyPress2, TimePoint timestamp, int seconds);
 	void sendChat(char input1, char input2, float delay);
 

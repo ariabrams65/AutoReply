@@ -32,7 +32,7 @@ void AutoReply::onLoad()
 	gameWrapper->HookEventWithCallerPost<ActorWrapper>("Function TAGame.PlayerController_TA.ChatMessage_TA",
 		[this](ActorWrapper caller, void* params, std::string eventname)
 		{
-			handleMessage(params);
+			onChatMessage(params);
 		});
 	gameWrapper->HookEventWithCallerPost<ServerWrapper>("Function TAGame.GFxHUD_TA.HandleStatEvent",
 		[this](ServerWrapper caller, void* params, std::string eventname)
@@ -44,10 +44,10 @@ void AutoReply::onLoad()
 void AutoReply::sendChat(char input1, char input2, float delay)
 {
 	gameWrapper->SetTimeout([=](GameWrapper* gw)
-		{
-			pressKey(input1);
-	pressKey(input2);
-		}, delay);
+	{
+		pressKey(input1);
+		pressKey(input2);
+	}, delay);
 
 }
 
@@ -64,7 +64,7 @@ void AutoReply::evalDuration(char input1, char input2, TimePoint timestamp, int 
 	}
 }
 
-void AutoReply::handleMessage(void* params)
+void AutoReply::onChatMessage(void* params)
 {
 	struct ChatMessageParams
 	{
@@ -78,8 +78,6 @@ void AutoReply::handleMessage(void* params)
 	std::string msg = UnrealStringWrapper(reinterpret_cast<uintptr_t>(chatParams->Message)).ToString();
 	PriWrapper chatterPRI(reinterpret_cast<uintptr_t>(chatParams->InPRI));
 
-	LOG(msg);
-
 	PlayerControllerWrapper playerController = gameWrapper->GetPlayerController();
 	if (!playerController) return;
 	PriWrapper primaryPRI = playerController.GetPRI();
@@ -88,21 +86,20 @@ void AutoReply::handleMessage(void* params)
 	if (primaryPRI.memory_address == chatterPRI.memory_address) return;
 	if (primaryPRI.GetTeam().GetTeamNum() != chatterPRI.GetTeam().GetTeamNum()) return;
 
+	handleMessage(msg);
+}
+
+void AutoReply::handleMessage(const std::string& msg)
+{
 	if (msg == "Group2Message5" || msg == "Group2Message1" || msg == "Group5Message2")
 	{
 		lastGoalComp = std::chrono::system_clock::now();
-		if (!responded)
-		{
-			evalDuration('2', '3', lastGoal, 15);
-		}
+		if (!responded) evalDuration('2', '3', lastGoal, 15);
 	}
 	else if (msg == "Group2Message2" || msg == "Group2Message5" || msg == "Group5Message2")
 	{
 		lastAssistComp = std::chrono::system_clock::now();
-		if (!responded)
-		{
-			evalDuration('2', '1', lastAssist, 15);
-		}
+		if (!responded) evalDuration('2', '1', lastAssist, 15);
 	}
 	else if (msg == "Group4Message5" || msg == "Group4Message7" || msg == "Group4Message6" || msg == "Group4Message4" || msg == "Group4Message3")
 	{
