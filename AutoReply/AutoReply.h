@@ -30,7 +30,9 @@ private:
 	void sendChat(char input1, char input2, float delay);
 	bool withinDuration(TimePoint timestamp, int seconds, bool lessThan);
 	void pressKey(char key);
-
+	void cVarEnabledChanged();
+	void hookAll();
+	void unhookAll();
 
 private:
 	bool responded;
@@ -40,6 +42,7 @@ private:
 	TimePoint lastAssistComp;
 	TimePoint lastApologyReply;
 
+	bool hooked;
 
 	// Inherited via PluginSettingsWindow
 	/*

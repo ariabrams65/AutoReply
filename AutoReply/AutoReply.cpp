@@ -26,18 +26,51 @@ void AutoReply::pressKey(char key)
 void AutoReply::onLoad()
 {
 	_globalCvarManager = cvarManager;
-	responded = false;
 
+	cvarManager->registerCvar("AutoReplyEnabled", "1")
+		.addOnValueChanged([this](std::string oldValue, CVarWrapper cvar)
+		{
+			cVarEnabledChanged();
+		});
+
+	responded = false;
+	hookAll();
+
+}
+
+void AutoReply::cVarEnabledChanged()
+{
+	bool enabled = cvarManager->getCvar("AutoReplyEnabled").getBoolValue();
+	if (enabled && !hooked)
+	{
+		hookAll();
+	}
+	else if (!enabled && hooked)
+	{
+		unhookAll();
+	}
+}
+
+void AutoReply::hookAll()
+{
 	gameWrapper->HookEventWithCallerPost<ActorWrapper>("Function TAGame.PlayerController_TA.ChatMessage_TA",
 		[this](ActorWrapper caller, void* params, std::string eventname)
-	{
-		onChatMessage(params);
-	});
+		{
+			onChatMessage(params);
+		});
 	gameWrapper->HookEventWithCallerPost<ServerWrapper>("Function TAGame.GFxHUD_TA.HandleStatEvent",
 		[this](ServerWrapper caller, void* params, std::string eventname)
-	{
-		onStatEvent(params);
-	});
+		{
+			onStatEvent(params);
+		});
+	hooked = true;
+}
+
+void AutoReply::unhookAll()
+{
+	gameWrapper->UnhookEvent("Function TAGame.PlayerController_TA.ChatMessage_TA");
+	gameWrapper->UnhookEvent("Function TAGame.GFxHUD_TA.HandleStatEvent");
+	hooked = false;
 }
 
 void AutoReply::sendChat(char input1, char input2, float delay)
