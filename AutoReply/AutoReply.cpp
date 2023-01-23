@@ -26,7 +26,6 @@ void AutoReply::pressKey(char key)
 void AutoReply::onLoad()
 {
 	_globalCvarManager = cvarManager;
-	LOG("AutoTHanks loaded");
 	responded = false;
 
 	gameWrapper->HookEventWithCallerPost<ActorWrapper>("Function TAGame.PlayerController_TA.ChatMessage_TA",
