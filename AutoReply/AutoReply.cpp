@@ -69,9 +69,9 @@ void AutoReply::onChatMessage(void* params)
 		bool bPreset;
 	};
 	if (!params) return;
-	ChatMessageParams* chatParams = reinterpret_cast<ChatMessageParams*>(params);
-	std::string msg = UnrealStringWrapper(reinterpret_cast<uintptr_t>(chatParams->Message)).ToString();
-	PriWrapper chatterPRI(reinterpret_cast<uintptr_t>(chatParams->InPRI));
+	ChatMessageParams* chatParams = (ChatMessageParams*)params;
+	std::string msg = UnrealStringWrapper((uintptr_t)chatParams->Message).ToString();
+	PriWrapper chatterPRI((uintptr_t)chatParams->InPRI);
 
 	PlayerControllerWrapper playerController = gameWrapper->GetPlayerController();
 	if (!playerController) return;
