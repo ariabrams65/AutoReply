@@ -9,7 +9,7 @@ void AutoReply::SetImGuiContext(uintptr_t ctx) {
 	ImGui::SetCurrentContext(reinterpret_cast<ImGuiContext*>(ctx));
 }
 
-void AutoReply::renderCheckbox(const std::string& cvar, const char* desc, const char* hoverText)
+void AutoReply::renderCheckbox(const std::string& cvar, const char* desc)
 {
 	CVarWrapper enableCvar = cvarManager->getCvar(cvar);
 	if (!enableCvar) return;
@@ -18,22 +18,14 @@ void AutoReply::renderCheckbox(const std::string& cvar, const char* desc, const 
 	{
 		enableCvar.setValue(enabled);
 	}
-	if (ImGui::IsItemHovered())
-	{
-		ImGui::SetTooltip(hoverText);
-	}
-
 }
 
 void AutoReply::RenderSettings()
 {
-	renderCheckbox("AutoReplyEnabled", "Enable plugin", "Toggle AutoReply");
-	renderCheckbox("goalCompRepliesEnabled", "Enable replies to goal compliments",
-		"When a teammate sends a message such as \"Nice shot!\" after you score, automatically thank them");
-	renderCheckbox("assistCompRepliesEnabled", "Enable replies to assist compliments",
-		"When a teammate sends a message such as \"Great pass!\" after you assist them, automatically compliment their shot");
-	renderCheckbox("apologyRepliesEnabled", "Enable replies to teammate apologies",
-		"When a teammate sends a message such as \"Sorry!\" automatically let them now that there is no problem");
-	renderCheckbox("goalCompEnabled", "Enable compliments to teammate's goals",
-		"Automatically compliment teammotes goals");
+	renderCheckbox("AutoReplyEnabled", "Enable plugin");
+	ImGui::Separator();
+	renderCheckbox("goalCompRepliesEnabled", "Say \"Thanks!\" when teammates compliment your goal");
+	renderCheckbox("assistCompRepliesEnabled", "Say \"Nice shot\" when teammates compliment your assist");
+	renderCheckbox("apologyRepliesEnabled", "Say \"No problem.\" when teammate apologizes");
+	renderCheckbox("goalCompEnabled", "Say \"Nice one\" after a teammate scores");
 }

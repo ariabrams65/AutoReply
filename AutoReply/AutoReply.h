@@ -34,7 +34,7 @@ private:
 	void cVarEnabledChanged();
 	void hookAll();
 	void unhookAll();
-	void renderCheckbox(const std::string& cvar, const char* desc, const char* hoverText);
+	void renderCheckbox(const std::string& cvar, const char* desc);
 	void handleGoalEvent(PriWrapper& primaryPRI, PriWrapper& receiverPRI);
 	void handleAssistEvent(PriWrapper& primaryPRI, PriWrapper& receiverPRI);
 
