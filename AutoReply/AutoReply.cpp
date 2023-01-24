@@ -8,21 +8,6 @@ BAKKESMOD_PLUGIN(AutoReply, "Reply automatically", plugin_version, PLUGINTYPE_FR
 
 std::shared_ptr<CVarManagerWrapper> _globalCvarManager;
 
-void AutoReply::pressKey(char key)
-{
-	INPUT ip;
-	ip.type = INPUT_KEYBOARD;
-	ip.ki.wScan = 0;
-	ip.ki.time = 0;
-	ip.ki.dwExtraInfo = 0;
-	ip.ki.wVk = key;
-	ip.ki.dwFlags = 0;
-	SendInput(1, &ip, sizeof(INPUT));
-
-	ip.ki.dwFlags = KEYEVENTF_KEYUP;
-	SendInput(1, &ip, sizeof(INPUT));
-}
-
 void AutoReply::onLoad()
 {
 	_globalCvarManager = cvarManager;
@@ -227,4 +212,19 @@ void AutoReply::onStatEvent(void* params)
 
 void AutoReply::onUnload()
 {
+}
+
+void AutoReply::pressKey(char key)
+{
+	INPUT ip;
+	ip.type = INPUT_KEYBOARD;
+	ip.ki.wScan = 0;
+	ip.ki.time = 0;
+	ip.ki.dwExtraInfo = 0;
+	ip.ki.wVk = key;
+	ip.ki.dwFlags = 0;
+	SendInput(1, &ip, sizeof(INPUT));
+
+	ip.ki.dwFlags = KEYEVENTF_KEYUP;
+	SendInput(1, &ip, sizeof(INPUT));
 }
