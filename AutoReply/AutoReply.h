@@ -16,9 +16,6 @@ class AutoReply : public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::P
 {
 	using TimePoint = std::chrono::time_point<std::chrono::system_clock>;
 
-	//std::shared_ptr<bool> enabled;
-
-	//Boilerplate
 public:
 	virtual void onLoad();
 	virtual void onUnload();
