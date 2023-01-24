@@ -33,7 +33,7 @@ void AutoReply::onLoad()
 			cVarEnabledChanged();
 		});
 	cvarManager->registerCvar("goalCompRepliesEnabled", "1", "Determines whether to reply to goal compliments");
-	cvarManager->registerCvar("assistCompReliesEnabled", "1", "Determines whether to reply to assist compliments");
+	cvarManager->registerCvar("assistCompRepliesEnabled", "1", "Determines whether to reply to assist compliments");
 	cvarManager->registerCvar("apologyRepliesEnabled", "1", "Determines whether to reply to apologies");
 
 	responded = false;

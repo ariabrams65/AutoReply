@@ -12,7 +12,7 @@
 constexpr auto plugin_version = stringify(VERSION_MAJOR) "." stringify(VERSION_MINOR) "." stringify(VERSION_PATCH) "." stringify(VERSION_BUILD);
 
 
-class AutoReply : public BakkesMod::Plugin::BakkesModPlugin/*, public BakkesMod::Plugin::PluginSettingsWindow*//*, public BakkesMod::Plugin::PluginWindow*/
+class AutoReply : public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::Plugin::PluginSettingsWindow/*, public BakkesMod::Plugin::PluginWindow*/
 {
 	using TimePoint = std::chrono::time_point<std::chrono::system_clock>;
 
@@ -22,6 +22,10 @@ class AutoReply : public BakkesMod::Plugin::BakkesModPlugin/*, public BakkesMod:
 public:
 	virtual void onLoad();
 	virtual void onUnload();
+
+	void RenderSettings() override;
+	std::string GetPluginName() override;
+	void SetImGuiContext(uintptr_t ctx) override;
 
 private:
 	void onChatMessage(void* params);
@@ -33,6 +37,7 @@ private:
 	void cVarEnabledChanged();
 	void hookAll();
 	void unhookAll();
+	void renderCheckbox(const std::string& cvar, const char* desc, const char* hoverText);
 
 private:
 	bool responded;
@@ -43,13 +48,6 @@ private:
 	TimePoint lastApologyReply;
 
 	bool hooked;
-
-	// Inherited via PluginSettingsWindow
-	/*
-	void RenderSettings() override;
-	std::string GetPluginName() override;
-	void SetImGuiContext(uintptr_t ctx) override;
-	*/
 
 	// Inherited via PluginWindow
 	/*
