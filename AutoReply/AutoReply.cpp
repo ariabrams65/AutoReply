@@ -35,6 +35,7 @@ void AutoReply::onLoad()
 	cvarManager->registerCvar("goalCompRepliesEnabled", "1", "Determines whether to reply to goal compliments");
 	cvarManager->registerCvar("assistCompRepliesEnabled", "1", "Determines whether to reply to assist compliments");
 	cvarManager->registerCvar("apologyRepliesEnabled", "1", "Determines whether to reply to apologies");
+	cvarManager->registerCvar("shotCompEnabled", "0", "Determines whether to compliment teammate's shots");
 
 	responded = false;
 	hookAll();
@@ -61,7 +62,7 @@ void AutoReply::hookAll()
 		{
 			onChatMessage(params);
 		});
-	gameWrapper->HookEventWithCallerPost<ServerWrapper>("Function TAGame.GFxHUD_TA.HandleStatEvent",
+	gameWrapper->HookEventWithCallerPost<ServerWrapper>("Function TAGame.GFxHUD_TA.HandleStatTickerMessage",
 		[this](ServerWrapper caller, void* params, std::string eventname)
 		{
 			onStatEvent(params);
@@ -72,7 +73,7 @@ void AutoReply::hookAll()
 void AutoReply::unhookAll()
 {
 	gameWrapper->UnhookEvent("Function TAGame.PlayerController_TA.ChatMessage_TA");
-	gameWrapper->UnhookEvent("Function TAGame.GFxHUD_TA.HandleStatEvent");
+	gameWrapper->UnhookEvent("Function TAGame.GFxHUD_TA.HandleStatTickerMessage");
 	hooked = false;
 }
 
@@ -141,7 +142,7 @@ void AutoReply::handleMessage(const std::string& msg)
 			sendChat('2', '1', 1);
 		}
 	}
-	else if (cvarManager->getCvar("apologyReliesEnabled")
+	else if (cvarManager->getCvar("apologyRepliesEnabled")
 		&& msg == "Group4Message5" || msg == "Group4Message7" || msg == "Group4Message6" || msg == "Group4Message4" || msg == "Group4Message3")
 	{
 		if (withinDuration(lastApologyReply, 15, false))
@@ -154,12 +155,13 @@ void AutoReply::handleMessage(const std::string& msg)
 
 void AutoReply::onStatEvent(void* params)
 {
-	struct StatEventParams
+	struct StatTickerParams 
 	{
-		uintptr_t PRI;
+		uintptr_t Receiver;
+		uintptr_t Victim;
 		uintptr_t StatEvent;
 	};
-	StatEventParams* pStruct = (StatEventParams*)params;
+	StatTickerParams* pStruct = (StatTickerParams*)params;
 	StatEventWrapper statEvent = StatEventWrapper(pStruct->StatEvent);
 	if (statEvent.GetEventName() == "Goal")
 	{

@@ -20,6 +20,7 @@ void AutoReply::renderCheckbox(const std::string& cvar, const char* desc, const 
 	bool enabled = enableCvar.getBoolValue();
 	if (ImGui::Checkbox(desc, &enabled))
 	{
+		LOG("cvar toggled");
 		enableCvar.setValue(enabled);
 	}
 	if (ImGui::IsItemHovered())
