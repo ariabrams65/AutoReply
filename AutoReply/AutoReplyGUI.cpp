@@ -24,8 +24,8 @@ void AutoReply::RenderSettings()
 {
 	renderCheckbox("AutoReplyEnabled", "Enable plugin");
 	ImGui::Separator();
-	renderCheckbox("goalCompRepliesEnabled", "Say \"Thanks!\" when teammates compliment your goal");
-	renderCheckbox("assistCompRepliesEnabled", "Say \"Nice shot\" when teammates compliment your assist");
+	renderCheckbox("goalComplimentRepliesEnabled", "Say \"Thanks!\" when teammates compliment your goal");
+	renderCheckbox("assistComplimentRepliesEnabled", "Say \"Nice shot\" when teammates compliment your assist");
 	renderCheckbox("apologyRepliesEnabled", "Say \"No problem.\" when teammate apologizes");
-	renderCheckbox("goalCompEnabled", "Say \"Nice one\" after a teammate scores");
+	renderCheckbox("goalComplimentEnabled", "Say \"Nice one\" after a teammate scores");
 }

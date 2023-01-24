@@ -44,14 +44,14 @@ private:
 
 	TimePoint lastGoal;
 	TimePoint lastAssist;
-	TimePoint lastGoalComp;
-	TimePoint lastAssistComp;
+	TimePoint lastGoalCompliment;
+	TimePoint lastAssistCompliment;
 	TimePoint lastApologyReply;
 
-	std::shared_ptr<bool> goalCompRepliesEnabled;
-	std::shared_ptr<bool> assistCompRepliesEnabled;
+	std::shared_ptr<bool> goalComplimentRepliesEnabled;
+	std::shared_ptr<bool> assistComplimentRepliesEnabled;
 	std::shared_ptr<bool> apologyRepliesEnabled;
-	std::shared_ptr<bool> goalCompEnabled;
+	std::shared_ptr<bool> goalComplimentEnabled;
 };
 
 

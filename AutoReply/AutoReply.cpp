@@ -27,24 +27,24 @@ void AutoReply::onLoad()
 {
 	_globalCvarManager = cvarManager;
 
-	goalCompRepliesEnabled = std::make_shared<bool>(true);
-	assistCompRepliesEnabled = std::make_shared<bool>(true);
+	goalComplimentRepliesEnabled = std::make_shared<bool>(true);
+	assistComplimentRepliesEnabled = std::make_shared<bool>(true);
 	apologyRepliesEnabled = std::make_shared<bool>(true);
-	goalCompEnabled = std::make_shared<bool>(false);
+	goalComplimentEnabled = std::make_shared<bool>(false);
 
 	cvarManager->registerCvar("AutoReplyEnabled", "1", "Whether AutoReply is enabled")
 		.addOnValueChanged([this](std::string oldValue, CVarWrapper cvar)
 		{
 			cVarEnabledChanged();
 		});
-	cvarManager->registerCvar("goalCompRepliesEnabled", "1")
-		.bindTo(goalCompRepliesEnabled);
-	cvarManager->registerCvar("assistCompRepliesEnabled", "1")
-		.bindTo(assistCompRepliesEnabled);
+	cvarManager->registerCvar("goalComplimentRepliesEnabled", "1")
+		.bindTo(goalComplimentRepliesEnabled);
+	cvarManager->registerCvar("assistComplimentRepliesEnabled", "1")
+		.bindTo(assistComplimentRepliesEnabled);
 	cvarManager->registerCvar("apologyRepliesEnabled", "1")
 		.bindTo(apologyRepliesEnabled);
-	cvarManager->registerCvar("goalCompEnabled", "0")
-		.bindTo(goalCompEnabled);
+	cvarManager->registerCvar("goalComplimentEnabled", "0")
+		.bindTo(goalComplimentEnabled);
 
 	responded = false;
 	hookAll();
@@ -132,8 +132,8 @@ void AutoReply::handleMessage(const std::string& msg)
 {
 	if (msg == "Group2Message5" || msg == "Group2Message1" || msg == "Group5Message2")
 	{
-		lastGoalComp = std::chrono::system_clock::now();
-		if (goalCompRepliesEnabled && !responded && withinDuration(lastGoal, 15))
+		lastGoalCompliment = std::chrono::system_clock::now();
+		if (goalComplimentRepliesEnabled && !responded && withinDuration(lastGoal, 15))
 		{
 			responded = true;
 			sendChat('2', '3', 1);
@@ -141,8 +141,8 @@ void AutoReply::handleMessage(const std::string& msg)
 	}
 	else if (msg == "Group2Message2" || msg == "Group2Message5" || msg == "Group5Message2")
 	{
-		lastAssistComp = std::chrono::system_clock::now();
-		if (assistCompRepliesEnabled && !responded && withinDuration(lastAssist, 15))
+		lastAssistCompliment = std::chrono::system_clock::now();
+		if (assistComplimentRepliesEnabled && !responded && withinDuration(lastAssist, 15))
 		{
 			responded = true;
 			sendChat('2', '1', 1);
@@ -164,13 +164,13 @@ void AutoReply::handleGoalEvent(PriWrapper& primaryPRI, PriWrapper& receiverPRI)
 	{
 		lastGoal = std::chrono::system_clock::now();
 		responded = false;
-		if (goalCompRepliesEnabled && withinDuration(lastGoalComp, 5))
+		if (goalComplimentRepliesEnabled && withinDuration(lastGoalCompliment, 5))
 		{
 			responded = true;
 			sendChat('2', '3', 1);
 		}
 	}
-	else if (goalCompEnabled && primaryPRI.GetTeam().GetTeamNum() == receiverPRI.GetTeam().GetTeamNum())
+	else if (goalComplimentEnabled && primaryPRI.GetTeam().GetTeamNum() == receiverPRI.GetTeam().GetTeamNum())
 	{
 		sendChat('2', '5', 1);
 	}
@@ -182,7 +182,7 @@ void AutoReply::handleAssistEvent(PriWrapper& primaryPRI, PriWrapper& receiverPR
 	{
 		lastAssist = std::chrono::system_clock::now();
 		responded = false;
-		if (assistCompRepliesEnabled && withinDuration(lastAssistComp, 5))
+		if (assistComplimentRepliesEnabled && withinDuration(lastAssistCompliment, 5))
 		{
 			responded = true;
 			sendChat('2', '1', 1);
