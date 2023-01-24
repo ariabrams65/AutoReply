@@ -27,15 +27,24 @@ void AutoReply::onLoad()
 {
 	_globalCvarManager = cvarManager;
 
+	goalCompRepliesEnabled = std::make_shared<bool>(true);
+	assistCompRepliesEnabled = std::make_shared<bool>(true);
+	apologyRepliesEnabled = std::make_shared<bool>(true);
+	goalCompEnabled = std::make_shared<bool>(false);
+
 	cvarManager->registerCvar("AutoReplyEnabled", "1", "Whether AutoReply is enabled")
 		.addOnValueChanged([this](std::string oldValue, CVarWrapper cvar)
 		{
 			cVarEnabledChanged();
 		});
-	cvarManager->registerCvar("goalCompRepliesEnabled", "1", "Determines whether to reply to goal compliments");
-	cvarManager->registerCvar("assistCompRepliesEnabled", "1", "Determines whether to reply to assist compliments");
-	cvarManager->registerCvar("apologyRepliesEnabled", "1", "Determines whether to reply to apologies");
-	cvarManager->registerCvar("shotCompEnabled", "0", "Determines whether to compliment teammate's shots");
+	cvarManager->registerCvar("goalCompRepliesEnabled", "1", "Determines whether to reply to goal compliments")
+		.bindTo(goalCompRepliesEnabled);
+	cvarManager->registerCvar("assistCompRepliesEnabled", "1", "Determines whether to reply to assist compliments")
+		.bindTo(assistCompRepliesEnabled);
+	cvarManager->registerCvar("apologyRepliesEnabled", "1", "Determines whether to reply to apologies")
+		.bindTo(apologyRepliesEnabled);
+	cvarManager->registerCvar("goalCompEnabled", "0", "Determines whether to compliment teammate's shots")
+		.bindTo(goalCompEnabled);
 
 	responded = false;
 	hookAll();
@@ -122,7 +131,7 @@ void AutoReply::onChatMessage(void* params)
 
 void AutoReply::handleMessage(const std::string& msg)
 {
-	if (cvarManager->getCvar("goalCompRepliesEnabled")
+	if (goalCompRepliesEnabled
 		&& (msg == "Group2Message5" || msg == "Group2Message1" || msg == "Group5Message2"))
 	{
 		lastGoalComp = std::chrono::system_clock::now();
@@ -132,7 +141,7 @@ void AutoReply::handleMessage(const std::string& msg)
 			sendChat('2', '3', 1);
 		}
 	}
-	else if (cvarManager->getCvar("assistCompRepliesEnabled")
+	else if (assistCompRepliesEnabled
 		&& msg == "Group2Message2" || msg == "Group2Message5" || msg == "Group5Message2")
 	{
 		lastAssistComp = std::chrono::system_clock::now();
@@ -142,7 +151,7 @@ void AutoReply::handleMessage(const std::string& msg)
 			sendChat('2', '1', 1);
 		}
 	}
-	else if (cvarManager->getCvar("apologyRepliesEnabled")
+	else if (apologyRepliesEnabled
 		&& msg == "Group4Message5" || msg == "Group4Message7" || msg == "Group4Message6" || msg == "Group4Message4" || msg == "Group4Message3")
 	{
 		if (withinDuration(lastApologyReply, 15, false))
@@ -162,15 +171,30 @@ void AutoReply::onStatEvent(void* params)
 		uintptr_t StatEvent;
 	};
 	StatTickerParams* pStruct = (StatTickerParams*)params;
+	PriWrapper receiverPRI = PriWrapper(pStruct->Receiver);
+	if (!receiverPRI) return;
 	StatEventWrapper statEvent = StatEventWrapper(pStruct->StatEvent);
+
+	PlayerControllerWrapper playerController = gameWrapper->GetPlayerController();
+	if (!playerController) return;
+	PriWrapper primaryPRI = playerController.GetPRI();
+	if (!primaryPRI) return;
+
 	if (statEvent.GetEventName() == "Goal")
 	{
-		lastGoal = std::chrono::system_clock::now();
-		responded = false;
-		if (withinDuration(lastGoalComp, 5))
+		if (primaryPRI.memory_address == receiverPRI.memory_address)
 		{
-			responded = true;
-			sendChat('2', '3', 1);
+			lastGoal = std::chrono::system_clock::now();
+			responded = false;
+			if (withinDuration(lastGoalComp, 5))
+			{
+				responded = true;
+				sendChat('2', '3', 1);
+			}
+		}
+		else if (goalCompEnabled && primaryPRI.GetTeam().GetTeamNum() == receiverPRI.GetTeam().GetTeamNum())
+		{
+			sendChat('2', '5', 1);
 		}
 	}
 	else if (statEvent.GetEventName() == "Assist")

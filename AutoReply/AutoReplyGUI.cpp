@@ -30,7 +30,8 @@ void AutoReply::renderCheckbox(const std::string& cvar, const char* desc, const 
 
 }
 
-void AutoReply::RenderSettings() {
+void AutoReply::RenderSettings()
+{
 	renderCheckbox("AutoReplyEnabled", "Enable plugin", "Toggle AutoReply");
 	renderCheckbox("goalCompRepliesEnabled", "Enable replies to goal compliments",
 		"When a teammate sends a message such as \"Nice shot!\" after you score, automatically thank them");
@@ -38,6 +39,8 @@ void AutoReply::RenderSettings() {
 		"When a teammate sends a message such as \"Great pass!\" after you assist them, automatically compliment their shot");
 	renderCheckbox("apologyRepliesEnabled", "Enable replies to teammate apologies",
 		"When a teammate sends a message such as \"Sorry!\" automatically let them now that there is no problem");
+	renderCheckbox("goalCompEnabled", "Enable compliments to teammate's goals",
+		"Automatically compliment teammotes goals");
 }
 
 /*

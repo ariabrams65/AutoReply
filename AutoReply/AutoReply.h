@@ -47,6 +47,11 @@ private:
 	TimePoint lastAssistComp;
 	TimePoint lastApologyReply;
 
+	std::shared_ptr<bool> goalCompRepliesEnabled;
+	std::shared_ptr<bool> assistCompRepliesEnabled;
+	std::shared_ptr<bool> apologyRepliesEnabled;
+	std::shared_ptr<bool> goalCompEnabled;
+
 	bool hooked;
 
 	// Inherited via PluginWindow
