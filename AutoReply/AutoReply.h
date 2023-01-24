@@ -29,7 +29,8 @@ private:
 	void onStatEvent(void* params);
 	void handleMessage(const std::string& msg);
 	void sendChat(char input1, char input2, float delay);
-	bool withinDuration(TimePoint timestamp, int seconds, bool lessThan);
+	bool isWithinGivenSeconds(TimePoint timestamp, int seconds);
+	bool givenSecondsHavePassed(TimePoint timestamp, int seconds);
 	void pressKey(char key);
 	void cVarEnabledChanged();
 	void hookAll();

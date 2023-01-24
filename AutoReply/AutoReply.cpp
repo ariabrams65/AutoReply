@@ -96,11 +96,18 @@ void AutoReply::sendChat(char input1, char input2, float delay)
 
 }
 
-bool AutoReply::withinDuration(TimePoint timestamp, int seconds, bool lessThan = true)
+bool AutoReply::isWithinGivenSeconds(TimePoint timestamp, int seconds)
 {
 	auto curTimeStamp = std::chrono::system_clock::now();
 	std::chrono::duration<double> dur = curTimeStamp - timestamp;
-	return lessThan ? dur.count() < seconds : dur.count() > seconds;
+	return dur.count() < seconds;
+}
+
+bool AutoReply::givenSecondsHavePassed(TimePoint timestamp, int seconds)
+{
+	auto curTimeStamp = std::chrono::system_clock::now();
+	std::chrono::duration<double> dur = curTimeStamp - timestamp;
+	return dur.count() > seconds;
 }
 
 void AutoReply::onChatMessage(void* params)
@@ -133,7 +140,7 @@ void AutoReply::handleMessage(const std::string& msg)
 	if (msg == "Group2Message5" || msg == "Group2Message1" || msg == "Group5Message2")
 	{
 		lastGoalCompliment = std::chrono::system_clock::now();
-		if (goalComplimentRepliesEnabled && !responded && withinDuration(lastGoal, 15))
+		if (goalComplimentRepliesEnabled && !responded && isWithinGivenSeconds(lastGoal, 15))
 		{
 			responded = true;
 			sendChat('2', '3', 1);
@@ -142,7 +149,7 @@ void AutoReply::handleMessage(const std::string& msg)
 	else if (msg == "Group2Message2" || msg == "Group2Message5" || msg == "Group5Message2")
 	{
 		lastAssistCompliment = std::chrono::system_clock::now();
-		if (assistComplimentRepliesEnabled && !responded && withinDuration(lastAssist, 15))
+		if (assistComplimentRepliesEnabled && !responded && isWithinGivenSeconds(lastAssist, 15))
 		{
 			responded = true;
 			sendChat('2', '1', 1);
@@ -150,7 +157,7 @@ void AutoReply::handleMessage(const std::string& msg)
 	}
 	else if (msg == "Group4Message5" || msg == "Group4Message7" || msg == "Group4Message6" || msg == "Group4Message4" || msg == "Group4Message3")
 	{
-		if (apologyRepliesEnabled && withinDuration(lastApologyReply, 15, false))
+		if (apologyRepliesEnabled && givenSecondsHavePassed(lastApologyReply, 15))
 		{
 			lastApologyReply = std::chrono::system_clock::now();
 			sendChat('4', '2', 2);
@@ -164,7 +171,7 @@ void AutoReply::handleGoalEvent(PriWrapper& primaryPRI, PriWrapper& receiverPRI)
 	{
 		lastGoal = std::chrono::system_clock::now();
 		responded = false;
-		if (goalComplimentRepliesEnabled && withinDuration(lastGoalCompliment, 5))
+		if (goalComplimentRepliesEnabled && isWithinGivenSeconds(lastGoalCompliment, 5))
 		{
 			responded = true;
 			sendChat('2', '3', 1);
@@ -182,7 +189,7 @@ void AutoReply::handleAssistEvent(PriWrapper& primaryPRI, PriWrapper& receiverPR
 	{
 		lastAssist = std::chrono::system_clock::now();
 		responded = false;
-		if (assistComplimentRepliesEnabled && withinDuration(lastAssistCompliment, 5))
+		if (assistComplimentRepliesEnabled && isWithinGivenSeconds(lastAssistCompliment, 5))
 		{
 			responded = true;
 			sendChat('2', '1', 1);
