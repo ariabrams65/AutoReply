@@ -100,7 +100,6 @@ bool AutoReply::withinDuration(TimePoint timestamp, int seconds, bool lessThan =
 {
 	auto curTimeStamp = std::chrono::system_clock::now();
 	std::chrono::duration<double> dur = curTimeStamp - timestamp;
-	LOG(std::to_string(dur.count()));
 	return lessThan ? dur.count() < seconds : dur.count() > seconds;
 }
 
