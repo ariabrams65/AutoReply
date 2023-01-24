@@ -162,6 +162,38 @@ void AutoReply::handleMessage(const std::string& msg)
 	}
 }
 
+void AutoReply::handleGoalEvent(PriWrapper& primaryPRI, PriWrapper& receiverPRI)
+{
+	if (primaryPRI.memory_address == receiverPRI.memory_address)
+	{
+		lastGoal = std::chrono::system_clock::now();
+		responded = false;
+		if (withinDuration(lastGoalComp, 5))
+		{
+			responded = true;
+			sendChat('2', '3', 1);
+		}
+	}
+	else if (goalCompEnabled && primaryPRI.GetTeam().GetTeamNum() == receiverPRI.GetTeam().GetTeamNum())
+	{
+		sendChat('2', '5', 1);
+	}
+}
+
+void AutoReply::handleAssistEvent(PriWrapper& primaryPRI, PriWrapper& receiverPRI)
+{
+	if (primaryPRI.memory_address == receiverPRI.memory_address)
+	{
+		lastAssist = std::chrono::system_clock::now();
+		responded = false;
+		if (withinDuration(lastAssistComp, 5))
+		{
+			responded = true;
+			sendChat('2', '1', 1);
+		}
+	}
+}
+
 void AutoReply::onStatEvent(void* params)
 {
 	struct StatTickerParams 
@@ -182,30 +214,11 @@ void AutoReply::onStatEvent(void* params)
 
 	if (statEvent.GetEventName() == "Goal")
 	{
-		if (primaryPRI.memory_address == receiverPRI.memory_address)
-		{
-			lastGoal = std::chrono::system_clock::now();
-			responded = false;
-			if (withinDuration(lastGoalComp, 5))
-			{
-				responded = true;
-				sendChat('2', '3', 1);
-			}
-		}
-		else if (goalCompEnabled && primaryPRI.GetTeam().GetTeamNum() == receiverPRI.GetTeam().GetTeamNum())
-		{
-			sendChat('2', '5', 1);
-		}
+		handleGoalEvent(primaryPRI, receiverPRI);
 	}
 	else if (statEvent.GetEventName() == "Assist")
 	{
-		lastAssist = std::chrono::system_clock::now();
-		responded = false;
-		if (withinDuration(lastAssistComp, 5))
-		{
-			responded = true;
-			sendChat('2', '1', 1);
-		}
+		handleAssistEvent(primaryPRI, receiverPRI);
 	}
 }
 
