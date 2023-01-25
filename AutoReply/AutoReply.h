@@ -11,7 +11,6 @@
 
 constexpr auto plugin_version = stringify(VERSION_MAJOR) "." stringify(VERSION_MINOR) "." stringify(VERSION_PATCH) "." stringify(VERSION_BUILD);
 
-
 class AutoReply : public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::Plugin::PluginSettingsWindow
 {
 	using TimePoint = std::chrono::time_point<std::chrono::system_clock>;
@@ -31,7 +30,6 @@ private:
 	void sendChat(char input1, char input2, float delay);
 	bool isWithinGivenSeconds(TimePoint timestamp, int seconds);
 	bool givenSecondsHavePassed(TimePoint timestamp, int seconds);
-	void pressKey(char key);
 	void cVarEnabledChanged();
 	void hookAll();
 	void unhookAll();
@@ -54,5 +52,3 @@ private:
 	std::shared_ptr<bool> apologyRepliesEnabled;
 	std::shared_ptr<bool> goalComplimentEnabled;
 };
-
-

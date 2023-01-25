@@ -1,8 +1,6 @@
 #include "pch.h"
 #include "AutoReply.h"
-#define WINVER 0x0500
 #include <windows.h>
-
 
 BAKKESMOD_PLUGIN(AutoReply, "Reply automatically", plugin_version, PLUGINTYPE_FREEPLAY)
 
@@ -41,12 +39,10 @@ void AutoReply::cVarEnabledChanged()
 	bool enabled = cvarManager->getCvar("AutoReplyEnabled").getBoolValue();
 	if (enabled && !hooked)
 	{
-		LOG("Hooking all...");
 		hookAll();
 	}
 	else if (!enabled && hooked)
 	{
-		LOG("unhooking all...");
 		unhookAll();
 	}
 }
@@ -77,10 +73,28 @@ void AutoReply::sendChat(char input1, char input2, float delay)
 {
 	gameWrapper->SetTimeout([=](GameWrapper* gw)
 	{
-		pressKey(input1);
-		pressKey(input2);
-	}, delay);
+		INPUT inputs[4];
+		ZeroMemory(inputs, sizeof(inputs));
+		auto inputLocale = GetKeyboardLayout(0);
+		auto input1VirtualKey = VkKeyScanExA(input1, inputLocale);
+		auto input2VirtualKey = VkKeyScanExA(input2, inputLocale);
 
+		inputs[0].type = INPUT_KEYBOARD;
+		inputs[0].ki.wVk = input1VirtualKey;
+
+		inputs[1].type = INPUT_KEYBOARD;
+		inputs[1].ki.wVk = input1VirtualKey;
+		inputs[1].ki.dwFlags = KEYEVENTF_KEYUP;
+
+		inputs[2].type = INPUT_KEYBOARD;
+		inputs[2].ki.wVk = input2VirtualKey;
+
+		inputs[3].type = INPUT_KEYBOARD;
+		inputs[3].ki.wVk = input2VirtualKey;
+		inputs[3].ki.dwFlags = KEYEVENTF_KEYUP;
+
+		SendInput(ARRAYSIZE(inputs), inputs, sizeof(INPUT));
+	}, delay);
 }
 
 bool AutoReply::isWithinGivenSeconds(TimePoint timestamp, int seconds)
@@ -217,19 +231,4 @@ void AutoReply::onStatEvent(void* params)
 
 void AutoReply::onUnload()
 {
-}
-
-void AutoReply::pressKey(char key)
-{
-	INPUT ip;
-	ip.type = INPUT_KEYBOARD;
-	ip.ki.wScan = 0;
-	ip.ki.time = 0;
-	ip.ki.dwExtraInfo = 0;
-	ip.ki.wVk = key;
-	ip.ki.dwFlags = 0;
-	SendInput(1, &ip, sizeof(INPUT));
-
-	ip.ki.dwFlags = KEYEVENTF_KEYUP;
-	SendInput(1, &ip, sizeof(INPUT));
 }
