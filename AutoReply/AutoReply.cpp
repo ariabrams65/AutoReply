@@ -2,6 +2,10 @@
 #include "AutoReply.h"
 #include <windows.h>
 
+#define COMPLIMENT_REPLY_DELAY 2
+#define APOLOGY_REPLY_DELAY 2
+#define COMPLIMENT_DELAY 3
+
 BAKKESMOD_PLUGIN(AutoReply, "Reply automatically", plugin_version, PLUGINTYPE_FREEPLAY)
 
 std::shared_ptr<CVarManagerWrapper> _globalCvarManager;
@@ -145,7 +149,7 @@ void AutoReply::handleMessage(const std::string& msg)
 		if (*goalComplimentRepliesEnabled && !respondedToCompliment && isWithinGivenSeconds(lastGoal, 15))
 		{
 			respondedToCompliment = true;
-			sendChat('2', '3', 1);
+			sendChat('2', '3', COMPLIMENT_REPLY_DELAY);
 		}
 	}
 	//teammate compliments assist
@@ -155,7 +159,7 @@ void AutoReply::handleMessage(const std::string& msg)
 		if (*assistComplimentRepliesEnabled && !respondedToCompliment && isWithinGivenSeconds(lastAssist, 15))
 		{
 			respondedToCompliment = true;
-			sendChat('2', '3', 1);
+			sendChat('2', '3', COMPLIMENT_REPLY_DELAY);
 		}
 	}
 	//teammate apologizes
@@ -164,7 +168,7 @@ void AutoReply::handleMessage(const std::string& msg)
 		if (*apologyRepliesEnabled && givenSecondsHavePassed(lastApologyReply, 15))
 		{
 			lastApologyReply = std::chrono::system_clock::now();
-			sendChat('4', '2', 2);
+			sendChat('4', '2', APOLOGY_REPLY_DELAY);
 		}
 	}
 }
@@ -178,12 +182,12 @@ void AutoReply::handleGoalEvent(PriWrapper& primaryPRI, PriWrapper& receiverPRI)
 		if (*goalComplimentRepliesEnabled && isWithinGivenSeconds(lastGoalCompliment, 5))
 		{
 			respondedToCompliment = true;
-			sendChat('2', '3', 1);
+			sendChat('2', '3', COMPLIMENT_REPLY_DELAY);
 		}
 	}
 	else if (*goalComplimentEnabled && primaryPRI.GetTeam().GetTeamNum() == receiverPRI.GetTeam().GetTeamNum())
 	{
-		sendChat('2', '1', 3);
+		sendChat('2', '1', COMPLIMENT_DELAY);
 	}
 }
 
@@ -196,7 +200,7 @@ void AutoReply::handleAssistEvent(PriWrapper& primaryPRI, PriWrapper& receiverPR
 		if (*assistComplimentRepliesEnabled && isWithinGivenSeconds(lastAssistCompliment, 5))
 		{
 			respondedToCompliment = true;
-			sendChat('2', '3', 1);
+			sendChat('2', '3', COMPLIMENT_REPLY_DELAY);
 		}
 	}
 }
