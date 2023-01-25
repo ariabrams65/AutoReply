@@ -2,9 +2,9 @@
 #include "AutoReply.h"
 #include <windows.h>
 
-#define COMPLIMENT_REPLY_DELAY 2
-#define APOLOGY_REPLY_DELAY 2
-#define COMPLIMENT_DELAY 3
+constexpr int COMPLIMENT_REPLY_DELAY = 2;
+constexpr int APOLOGY_REPLY_DELAY = 2;
+constexpr int COMPLIMENT_DELAY = 3;
 
 BAKKESMOD_PLUGIN(AutoReply, "Reply automatically", plugin_version, PLUGINTYPE_FREEPLAY)
 
