@@ -11,6 +11,9 @@
 
 constexpr auto plugin_version = stringify(VERSION_MAJOR) "." stringify(VERSION_MINOR) "." stringify(VERSION_PATCH) "." stringify(VERSION_BUILD);
 
+constexpr float SLIDER_MIN = 0.0;
+constexpr float SLIDER_MAX = 10.0;
+
 class AutoReply : public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::Plugin::PluginSettingsWindow
 {
 	using TimePoint = std::chrono::time_point<std::chrono::system_clock>;
@@ -33,9 +36,11 @@ private:
 	void cVarEnabledChanged();
 	void hookAll();
 	void unhookAll();
-	void renderCheckbox(const std::string& cvar, const char* desc);
 	void handleGoalEvent(PriWrapper& primaryPRI, PriWrapper& receiverPRI);
 	void handleAssistEvent(PriWrapper& primaryPRI, PriWrapper& receiverPRI);
+
+	void renderCheckbox(const std::string& cvar, const char* desc);
+	void renderSlider(const std::string& cvar, const char* desc);
 
 private:
 	bool respondedToCompliment;
@@ -51,4 +56,9 @@ private:
 	std::shared_ptr<bool> assistComplimentRepliesEnabled;
 	std::shared_ptr<bool> apologyRepliesEnabled;
 	std::shared_ptr<bool> goalComplimentEnabled;
+	
+	std::shared_ptr<float> goalComplimentReplyDelay;
+	std::shared_ptr<float> assistComplimentReplyDelay;
+	std::shared_ptr<float> apologyReplyDelay;
+	std::shared_ptr<float> goalComplimentDelay;
 };

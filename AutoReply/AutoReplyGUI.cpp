@@ -20,12 +20,30 @@ void AutoReply::renderCheckbox(const std::string& cvar, const char* desc)
 	}
 }
 
+void AutoReply::renderSlider(const std::string& cvar, const char* desc)
+{		
+	CVarWrapper delayCvar = cvarManager->getCvar(cvar);
+	if (!delayCvar) return;
+	float delay = delayCvar.getFloatValue();
+	if (ImGui::SliderFloat(desc, &delay, SLIDER_MIN, SLIDER_MAX))
+	{
+		delayCvar.setValue(delay);
+	}
+}
+
 void AutoReply::RenderSettings()
 {
 	renderCheckbox("AutoReplyEnabled", "Enable plugin");
 	ImGui::Separator();
 	renderCheckbox("goalComplimentRepliesEnabled", "Say \"Thanks!\" when teammates compliment your goal");
+	renderSlider("goalComplimentReplyDelay", "Goal compliment reply delay (in seconds)");
+	ImGui::Separator();
 	renderCheckbox("assistComplimentRepliesEnabled", "Say \"Thanks!\" when teammates compliment your assist");
+	renderSlider("assistComplimentReplyDelay", "Assist compliment reply delay (in seconds)");
+	ImGui::Separator();
 	renderCheckbox("apologyRepliesEnabled", "Say \"No problem.\" when teammate apologizes");
+	renderSlider("apologyReplyDelay", "Apology reply delay (in seconds)");
+	ImGui::Separator();
 	renderCheckbox("goalComplimentEnabled", "Say \"Nice shot!\" after a teammate scores");
+	renderSlider("goalComplimentDelay", "Goal compliment delay (in seconds)");
 }

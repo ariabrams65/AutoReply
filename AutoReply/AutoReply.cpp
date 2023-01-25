@@ -2,10 +2,6 @@
 #include "AutoReply.h"
 #include <windows.h>
 
-constexpr int COMPLIMENT_REPLY_DELAY = 2;
-constexpr int APOLOGY_REPLY_DELAY = 2;
-constexpr int COMPLIMENT_DELAY = 3;
-
 BAKKESMOD_PLUGIN(AutoReply, "Reply automatically", plugin_version, PLUGINTYPE_FREEPLAY)
 
 std::shared_ptr<CVarManagerWrapper> _globalCvarManager;
@@ -18,6 +14,11 @@ void AutoReply::onLoad()
 	assistComplimentRepliesEnabled = std::make_shared<bool>(true);
 	apologyRepliesEnabled = std::make_shared<bool>(true);
 	goalComplimentEnabled = std::make_shared<bool>(false);
+
+	goalComplimentReplyDelay = std::make_shared<float>(2);
+	assistComplimentReplyDelay = std::make_shared<float>(2);
+	apologyReplyDelay = std::make_shared<float>(2);
+	goalComplimentDelay = std::make_shared<float>(3);
 
 	cvarManager->registerCvar("AutoReplyEnabled", "1", "Whether AutoReply is enabled")
 		.addOnValueChanged([this](std::string oldValue, CVarWrapper cvar)
@@ -33,9 +34,17 @@ void AutoReply::onLoad()
 	cvarManager->registerCvar("goalComplimentEnabled", "0")
 		.bindTo(goalComplimentEnabled);
 
+	cvarManager->registerCvar("goalComplimentReplyDelay", "2")
+		.bindTo(goalComplimentReplyDelay);
+	cvarManager->registerCvar("assistComplimentReplyDelay", "2")
+		.bindTo(assistComplimentReplyDelay);
+	cvarManager->registerCvar("apologyReplyDelay", "2")
+		.bindTo(apologyReplyDelay);
+	cvarManager->registerCvar("goalComplimentDelay", "3")
+		.bindTo(goalComplimentDelay);
+
 	respondedToCompliment = false;
 	hookAll();
-
 }
 
 void AutoReply::cVarEnabledChanged()
@@ -149,7 +158,7 @@ void AutoReply::handleMessage(const std::string& msg)
 		if (*goalComplimentRepliesEnabled && !respondedToCompliment && isWithinGivenSeconds(lastGoal, 15))
 		{
 			respondedToCompliment = true;
-			sendChat('2', '3', COMPLIMENT_REPLY_DELAY);
+			sendChat('2', '3', *goalComplimentReplyDelay);
 		}
 	}
 	//teammate compliments assist
@@ -159,7 +168,7 @@ void AutoReply::handleMessage(const std::string& msg)
 		if (*assistComplimentRepliesEnabled && !respondedToCompliment && isWithinGivenSeconds(lastAssist, 15))
 		{
 			respondedToCompliment = true;
-			sendChat('2', '3', COMPLIMENT_REPLY_DELAY);
+			sendChat('2', '3', *assistComplimentReplyDelay);
 		}
 	}
 	//teammate apologizes
@@ -168,7 +177,7 @@ void AutoReply::handleMessage(const std::string& msg)
 		if (*apologyRepliesEnabled && givenSecondsHavePassed(lastApologyReply, 15))
 		{
 			lastApologyReply = std::chrono::system_clock::now();
-			sendChat('4', '2', APOLOGY_REPLY_DELAY);
+			sendChat('4', '2', *apologyReplyDelay);
 		}
 	}
 }
@@ -182,12 +191,12 @@ void AutoReply::handleGoalEvent(PriWrapper& primaryPRI, PriWrapper& receiverPRI)
 		if (*goalComplimentRepliesEnabled && isWithinGivenSeconds(lastGoalCompliment, 5))
 		{
 			respondedToCompliment = true;
-			sendChat('2', '3', COMPLIMENT_REPLY_DELAY);
+			sendChat('2', '3', *goalComplimentReplyDelay);
 		}
 	}
 	else if (*goalComplimentEnabled && primaryPRI.GetTeam().GetTeamNum() == receiverPRI.GetTeam().GetTeamNum())
 	{
-		sendChat('2', '1', COMPLIMENT_DELAY);
+		sendChat('2', '1', *goalComplimentDelay);
 	}
 }
 
@@ -200,7 +209,7 @@ void AutoReply::handleAssistEvent(PriWrapper& primaryPRI, PriWrapper& receiverPR
 		if (*assistComplimentRepliesEnabled && isWithinGivenSeconds(lastAssistCompliment, 5))
 		{
 			respondedToCompliment = true;
-			sendChat('2', '3', COMPLIMENT_REPLY_DELAY);
+			sendChat('2', '3', *assistComplimentReplyDelay);
 		}
 	}
 }
