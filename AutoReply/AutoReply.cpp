@@ -20,8 +20,9 @@ void AutoReply::onLoad()
 	apologyReplyDelay = std::make_shared<float>(2);
 	goalComplimentDelay = std::make_shared<float>(3);
 
-	registerCvars();
 	respondedToCompliment = false;
+
+	registerCvars();
 	hookAll();
 }
 
