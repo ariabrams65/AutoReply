@@ -27,6 +27,7 @@ public:
 	void SetImGuiContext(uintptr_t ctx) override;
 
 private:
+	void registerCvars();
 	void onChatMessage(void* params);
 	void onStatEvent(void* params);
 	void handleMessage(const std::string& msg);

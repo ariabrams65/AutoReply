@@ -20,6 +20,13 @@ void AutoReply::onLoad()
 	apologyReplyDelay = std::make_shared<float>(2);
 	goalComplimentDelay = std::make_shared<float>(3);
 
+	registerCvars();
+	respondedToCompliment = false;
+	hookAll();
+}
+
+void AutoReply::registerCvars()
+{
 	cvarManager->registerCvar("AutoReplyEnabled", "1", "Whether AutoReply is enabled")
 		.addOnValueChanged([this](std::string oldValue, CVarWrapper cvar)
 		{
@@ -33,7 +40,6 @@ void AutoReply::onLoad()
 		.bindTo(apologyRepliesEnabled);
 	cvarManager->registerCvar("goalComplimentEnabled", "0")
 		.bindTo(goalComplimentEnabled);
-
 	cvarManager->registerCvar("goalComplimentReplyDelay", "2")
 		.bindTo(goalComplimentReplyDelay);
 	cvarManager->registerCvar("assistComplimentReplyDelay", "2")
@@ -42,9 +48,6 @@ void AutoReply::onLoad()
 		.bindTo(apologyReplyDelay);
 	cvarManager->registerCvar("goalComplimentDelay", "3")
 		.bindTo(goalComplimentDelay);
-
-	respondedToCompliment = false;
-	hookAll();
 }
 
 void AutoReply::cVarEnabledChanged()
