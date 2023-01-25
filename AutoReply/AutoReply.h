@@ -40,7 +40,7 @@ private:
 	void handleAssistEvent(PriWrapper& primaryPRI, PriWrapper& receiverPRI);
 
 private:
-	bool responded;
+	bool respondedToCompliment;
 	bool hooked;
 
 	TimePoint lastGoal;
