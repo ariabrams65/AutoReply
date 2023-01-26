@@ -31,6 +31,13 @@ void AutoReply::renderSlider(const std::string& cvar, const char* desc)
 	}
 }
 
+void AutoReply::resetCvar(const std::string& cvar)
+{
+	CVarWrapper delayCvar = cvarManager->getCvar(cvar);
+	if (!delayCvar) return;
+	delayCvar.ResetToDefault();
+}
+
 void AutoReply::RenderSettings()
 {
 	renderCheckbox("AutoReplyEnabled", "Enable plugin");
@@ -46,4 +53,13 @@ void AutoReply::RenderSettings()
 	ImGui::Separator();
 	renderCheckbox("goalComplimentEnabled", "Say \"Nice shot!\" after a teammate scores");
 	renderSlider("goalComplimentDelay", "Goal compliment delay (in seconds)");
+	ImGui::Separator();
+	if (ImGui::Button("Reset sliders"))
+	{
+		resetCvar("goalComplimentReplyDelay");
+		resetCvar("assistComplimentReplyDelay");
+		resetCvar("assistComplimentReplyDelay");
+		resetCvar("apologyReplyDelay");
+		resetCvar("goalComplimentDelay");
+	}
 }

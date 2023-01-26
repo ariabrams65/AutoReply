@@ -42,6 +42,7 @@ private:
 
 	void renderCheckbox(const std::string& cvar, const char* desc);
 	void renderSlider(const std::string& cvar, const char* desc);
+	void resetCvar(const std::string& cvar);
 
 private:
 	bool respondedToCompliment;
